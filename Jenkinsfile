@@ -21,13 +21,10 @@ pipeline {
             }
         }
 
-        stage('Install Requirements') {
+        stage('Setup Virtual Environment') {
             steps {
-                echo "Installing Python dependencies..."
+                echo "Setting up Python virtual environment..."
                 sh '''
-                    # Ensure user bin is in PATH (in case pip was installed with --user in a previous build)
-                    export PATH="$HOME/.local/bin:$PATH"
-                    
                     # Detect Python command
                     if command -v python3 &> /dev/null; then
                         PYTHON_CMD=python3
@@ -41,66 +38,44 @@ pipeline {
                     echo "Using Python: $PYTHON_CMD"
                     $PYTHON_CMD --version
                     
-                    # Check if pip is available
-                    if ! $PYTHON_CMD -m pip --version &> /dev/null; then
-                        echo "pip not found. Attempting to install pip..."
-                        
-                        # Method 1: Try ensurepip (built-in to Python 3.4+)
-                        if $PYTHON_CMD -m ensurepip --version &> /dev/null; then
-                            echo "Installing pip using ensurepip..."
-                            $PYTHON_CMD -m ensurepip --upgrade --default-pip || echo "ensurepip failed, trying alternative..."
-                        fi
-                        
-                        # Method 2: Try using get-pip.py if ensurepip failed
-                        if ! $PYTHON_CMD -m pip --version &> /dev/null; then
-                            echo "Trying get-pip.py..."
-                            if command -v curl &> /dev/null; then
-                                curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-                                # Try with --user first to avoid permission issues
-                                $PYTHON_CMD get-pip.py --user || $PYTHON_CMD get-pip.py || echo "get-pip.py failed"
-                                rm -f get-pip.py
-                                # Add user local bin to PATH if --user was used
-                                export PATH="$HOME/.local/bin:$PATH"
-                            elif command -v wget &> /dev/null; then
-                                wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py
-                                $PYTHON_CMD get-pip.py --user || $PYTHON_CMD get-pip.py || echo "get-pip.py failed"
-                                rm -f get-pip.py
-                                # Add user local bin to PATH if --user was used
-                                export PATH="$HOME/.local/bin:$PATH"
-                            fi
-                        fi
-                        
-                        # Method 3: Try system package manager (if available with sudo)
-                        if ! $PYTHON_CMD -m pip --version &> /dev/null; then
-                            echo "Trying system package manager..."
-                            if command -v apt-get &> /dev/null && command -v sudo &> /dev/null; then
-                                sudo apt-get update && sudo apt-get install -y python3-pip || echo "apt-get install failed"
-                            elif command -v yum &> /dev/null && command -v sudo &> /dev/null; then
-                                sudo yum install -y python3-pip || echo "yum install failed"
-                            fi
-                        fi
-                        
-                        # Final check
-                        if ! $PYTHON_CMD -m pip --version &> /dev/null; then
-                            echo "ERROR: Failed to install pip. Please install pip manually."
-                            exit 1
-                        fi
+                    # Create virtual environment (venv module is built-in to Python 3.3+)
+                    # On some systems, python3-venv package may need to be installed separately
+                    echo "Creating virtual environment..."
+                    if ! $PYTHON_CMD -m venv venv; then
+                        echo "ERROR: Failed to create virtual environment."
+                        echo "The venv module may not be available. On Ubuntu/Debian, install with:"
+                        echo "  sudo apt-get install python3-venv"
+                        echo "Or ensure the Jenkins agent has python3-venv installed."
+                        exit 1
                     fi
                     
-                    # Verify pip is available
-                    echo "pip is available:"
-                    $PYTHON_CMD -m pip --version
+                    # Activate virtual environment
+                    echo "Activating virtual environment..."
+                    source venv/bin/activate
                     
-                    # Ensure user bin is in PATH (in case pip was installed with --user)
-                    export PATH="$HOME/.local/bin:$PATH"
+                    # Verify pip is available in venv
+                    echo "pip version in virtual environment:"
+                    pip --version
                     
-                    # Upgrade pip (try with --user if regular install fails)
+                    # Upgrade pip
                     echo "Upgrading pip..."
-                    $PYTHON_CMD -m pip install --upgrade pip || $PYTHON_CMD -m pip install --upgrade --user pip
+                    pip install --upgrade pip
                     
-                    # Install requirements (try with --user if regular install fails)
+                    echo "✅ Virtual environment setup complete"
+                '''
+            }
+        }
+
+        stage('Install Requirements') {
+            steps {
+                echo "Installing Python dependencies..."
+                sh '''
+                    # Activate virtual environment
+                    source venv/bin/activate
+                    
+                    # Install requirements
                     echo "Installing requirements from requirements.txt..."
-                    $PYTHON_CMD -m pip install -r requirements.txt || $PYTHON_CMD -m pip install --user -r requirements.txt
+                    pip install -r requirements.txt
                     
                     echo "✅ Dependencies installed successfully"
                 '''
@@ -111,24 +86,14 @@ pipeline {
             steps {
                 echo "Running unit tests..."
                 sh '''
-                    # Ensure user bin is in PATH
-                    export PATH="$HOME/.local/bin:$PATH"
+                    # Activate virtual environment
+                    source venv/bin/activate
                     
-                    # Detect Python command
-                    if command -v python3 &> /dev/null; then
-                        PYTHON_CMD=python3
-                    elif command -v python &> /dev/null; then
-                        PYTHON_CMD=python
-                    else
-                        echo "ERROR: Python not found!"
-                        exit 1
-                    fi
-                    
-                    # Install pytest if not already installed
-                    $PYTHON_CMD -m pip install pytest || $PYTHON_CMD -m pip install --user pytest
+                    # Install pytest if not already installed (should be in requirements.txt, but just in case)
+                    pip install pytest
                     
                     # Run tests
-                    $PYTHON_CMD -m pytest -v test_project1.py
+                    pytest -v test_project1.py
                 '''
             }
         }
@@ -163,7 +128,17 @@ pipeline {
             steps {
                 echo "Starting app (only on main/master branch)"
                 sh '''
-                    timeout 15 python3 project1.py || timeout 15 python project1.py || echo "App start skipped"
+                    # Activate virtual environment
+                    source venv/bin/activate
+                    
+                    # Run app with timeout (if available)
+                    if command -v timeout &> /dev/null; then
+                        timeout 15 python project1.py || echo "App start skipped"
+                    else
+                        python project1.py &
+                        sleep 15
+                        pkill -f project1.py || echo "App process ended"
+                    fi
                 '''
             }
         }
