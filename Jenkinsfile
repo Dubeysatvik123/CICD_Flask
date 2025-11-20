@@ -30,7 +30,7 @@ pipeline {
                 echo "Installing Python dependencies..."
                 sh '''
                      
-                    pip install -r requirements.txt
+                    python3-pip install -r requirements.txt
                 '''
             }
         }
@@ -40,7 +40,7 @@ pipeline {
                 echo "Running unit tests..."
                 sh '''
                      
-                    pip install pytest
+                   python3-pip install pytest
                     pytest -v test_project1.py
                 '''
             }
