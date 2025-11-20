@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-    // Parameter for branch selection
     parameters {
         string(
             name: 'BRANCH_TO_BUILD',
