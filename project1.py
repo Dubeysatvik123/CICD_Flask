@@ -2,7 +2,7 @@ import google.generativeai as genai
 import gradio as gr
 import time
 
-genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+genai.configure(api_key="AIzaSyDx51shxWIAX8pSm85SHuQS94-6YB3AJLA")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 def evaluate_startup_idea(prompt, progress=gr.Progress()):
