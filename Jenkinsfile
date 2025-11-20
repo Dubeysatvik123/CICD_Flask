@@ -1,7 +1,20 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch to build')
+    }
+
     stages {
+        stage('Checkout') {
+            steps {
+                sh """
+                    git fetch origin
+                    git checkout ${params.BRANCH}
+                    git pull origin ${params.BRANCH}
+                """
+            }
+        }
         stage('Build') {
             steps {
                 sh '''
@@ -17,10 +30,10 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    def tag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    def tag = "${params.BRANCH}-${env.BUILD_NUMBER}"
                     sh """
-                        sudo docker build -t cicd_flask_app:${tag} -f Dockerfile .
-                        sudo docker run -d -p 7860:7860 --name cicd_flask_${BUILD_NUMBER} cicd_flask_app:${tag}
+                        docker build -t cicd_flask_app:${tag} -f Dockerfile .
+                        docker run -d -p 7860:7860 --name cicd_flask_${BUILD_NUMBER} cicd_flask_app:${tag}
                     """
                 }
             }
