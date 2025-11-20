@@ -19,8 +19,8 @@ pipeline {
                 script {
                     def tag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                     sh """
-                        docker build -t cicd_flask_app:${tag} -f Dockerfile .
-                        docker run -d -p 7860:7860 --name cicd_flask_${BUILD_NUMBER} cicd_flask_app:${tag}
+                        sudo docker build -t cicd_flask_app:${tag} -f Dockerfile .
+                        sudo docker run -d -p 7860:7860 --name cicd_flask_${BUILD_NUMBER} cicd_flask_app:${tag}
                     """
                 }
             }
