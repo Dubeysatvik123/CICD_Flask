@@ -29,7 +29,7 @@ pipeline {
             steps {
                 echo "Installing Python dependencies..."
                 sh '''
-                    source env/bin/activate
+                     
                     pip install -r requirements.txt
                 '''
             }
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 echo "Running unit tests..."
                 sh '''
-                    source env/bin/activate
+                     
                     pip install pytest
                     pytest -v test_project1.py
                 '''
@@ -79,7 +79,7 @@ pipeline {
             steps {
                 echo "Starting application (main/master)..."
                 sh '''
-                    source env/bin/activate
+                     
                     cd CICD_Flask
                     python project1.py
                 '''
