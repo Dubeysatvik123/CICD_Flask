@@ -24,16 +24,6 @@ pipeline {
             }
         }
 
-        stage('Setup Virtual Environment') {
-            steps {
-                echo "Setting up Python virtual environment..."
-                sh '''
-                    python3 -m venv env
-                    source env/bin/activate
-                    pip install --upgrade pip wheel setuptools
-                '''
-            }
-        }
 
         stage('Install Requirements') {
             steps {
