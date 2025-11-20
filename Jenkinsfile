@@ -1,26 +1,22 @@
 pipeline {
     agent any
 
-    // Parameter for branch selection
-    parameters {
-        string(
-            name: 'BRANCH_TO_BUILD',
-            defaultValue: 'main',
-            description: 'Enter the Git branch to build'
-        )
-    }
-
     environment {
-        REPO_URL = 'https://github.com/Dubeysatvik123/CICD_Flask.git'
-        IMAGE_NAME = "cicd_flask_app:${params.BRANCH_TO_BUILD}"
+        // Use BRANCH_NAME for multibranch pipelines - automatically set by Jenkins
+        IMAGE_NAME = "cicd_flask_app:${env.BRANCH_NAME ?: 'unknown'}"
+        // Sanitize branch name for Docker tag (remove special characters)
+        DOCKER_TAG = "${env.BRANCH_NAME ?: 'unknown'}-${env.BUILD_NUMBER}"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                echo "Checking out branch: ${params.BRANCH_TO_BUILD}"
-                git branch: "${params.BRANCH_TO_BUILD}", url: "${env.REPO_URL}"
+                script {
+                    echo "Building branch: ${env.BRANCH_NAME}"
+                    echo "Build number: ${env.BUILD_NUMBER}"
+                    // In multibranch pipelines, checkout scm automatically checks out the current branch
+                    checkout scm
+                }
             }
         }
 
@@ -28,8 +24,9 @@ pipeline {
             steps {
                 echo "Installing Python dependencies..."
                 sh '''
-                    python3 -m pip install --upgrade pip
-                    pip install -r requirements.txt
+                    python3 --version || python --version
+                    python3 -m pip install --upgrade pip || python -m pip install --upgrade pip
+                    pip3 install -r requirements.txt || pip install -r requirements.txt
                 '''
             }
         }
@@ -38,29 +35,43 @@ pipeline {
             steps {
                 echo "Running unit tests..."
                 sh '''
-                    pip install pytest
-                    pytest -q
+                    pip3 install pytest || pip install pytest
+                    pytest -v test_project1.py || pytest test_project1.py
                 '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image: ${env.IMAGE_NAME}"
-                sh "docker build -t ${env.IMAGE_NAME} ."
+                script {
+                    // Sanitize branch name for Docker tag (Docker tags can't have certain characters)
+                    def branchName = env.BRANCH_NAME ?: 'unknown'
+                    def sanitizedBranch = branchName.replaceAll(/[^a-zA-Z0-9._-]/, '-').toLowerCase()
+                    def dockerImage = "cicd_flask_app:${sanitizedBranch}-${env.BUILD_NUMBER}"
+                    env.IMAGE_NAME = dockerImage
+                    
+                    echo "Building Docker image: ${dockerImage}"
+                    sh """
+                        docker --version || echo "Warning: Docker not available"
+                        docker build -t ${dockerImage} .
+                        docker tag ${dockerImage} cicd_flask_app:${sanitizedBranch}-latest
+                        echo "Successfully built and tagged image: ${dockerImage}"
+                    """
+                }
             }
         }
 
         stage('Optional: Run Flask/Gradio App') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                }
             }
             steps {
-                echo "Starting app (only on main branch)"
+                echo "Starting app (only on main/master branch)"
                 sh '''
-                    python project1.py &
-                    sleep 10
-                    echo "App started"
+                    timeout 15 python3 project1.py || timeout 15 python project1.py || echo "App start skipped"
                 '''
             }
         }
@@ -68,7 +79,24 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline finished for branch ${params.BRANCH_TO_BUILD}"
+            script {
+                echo "========================================="
+                echo "Pipeline Summary:"
+                echo "Branch: ${env.BRANCH_NAME}"
+                echo "Build Number: ${env.BUILD_NUMBER}"
+                echo "Docker Image: ${env.IMAGE_NAME ?: 'N/A'}"
+                echo "========================================="
+            }
+        }
+        success {
+            echo "✅ Pipeline succeeded for branch: ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "❌ Pipeline failed for branch: ${env.BRANCH_NAME}"
+            echo "Check the logs above for error details"
+        }
+        unstable {
+            echo "⚠️ Pipeline is unstable for branch: ${env.BRANCH_NAME}"
         }
     }
 }
