@@ -1,6 +1,5 @@
 pipeline {
-    agent any
-
+    agent { label 'built-in' }
     environment {
         // Safe branch naming for Docker tag
         SANITIZED_BRANCH = "${env.BRANCH_NAME ?: 'unknown'}"
