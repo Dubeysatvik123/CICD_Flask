@@ -1,22 +1,33 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'
-            args '-u'
-        }
-    }
+    agent any
 
-    options {
-        skipDefaultCheckout(false)  // needed for multibranch
+    parameters {
+        gitParameter(
+            name: 'BRANCH_NAME',
+            type: 'PT_BRANCH',
+            defaultValue: 'main',
+            branchFilter: '.*',
+            selectedValue: 'DEFAULT',
+            sortMode: 'ASCENDING',
+            description: 'Select Git branch to build'
+        )
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Checking out branch: ${params.BRANCH_NAME}"
+                checkout([$class: 'GitSCM',
+                          branches: [[name: "*/${params.BRANCH_NAME}"]],
+                          userRemoteConfigs: [[url: 'https://github.com/Dubeysatvik123/CICD_Flask.git']]])
+            }
+        }
 
-        stage('Install Dependencies') {
+        stage('Install Requirements') {
             steps {
                 sh '''
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
+                  python3 -m pip install --upgrade pip
+                  pip install -r requirements.txt
                 '''
             }
         }
@@ -24,8 +35,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    pip install pytest
-                    pytest -q
+                  pip install pytest
+                  pytest -q
                 '''
             }
         }
@@ -33,31 +44,17 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def imgName = "gradio-app:${env.BRANCH_NAME}"
-                    sh "docker build -t ${imgName} ."
-                    echo "Docker image built: ${imgName}"
+                  def imageTag = "cicd_flask_app:${params.BRANCH_NAME}"
+                  sh "docker build -t ${imageTag} ."
+                  echo "Docker image built: ${imageTag}"
                 }
-            }
-        }
-
-        stage('Run App (Optional)') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh '''
-                echo "Launching Gradio App..."
-                python project1.py &
-                sleep 10
-                echo "App started"
-                '''
             }
         }
     }
 
     post {
         always {
-            echo "Build completed for branch: ${env.BRANCH_NAME}"
+            echo "Pipeline completed for branch ${params.BRANCH_NAME}"
         }
     }
 }
