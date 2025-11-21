@@ -29,9 +29,10 @@ pipeline {
             defaultValue: false,
             description: 'Push Docker image to AWS ECR'
         )
-        hiddenParameter(
-            name: 'SECRET_BUILD_KEY',
-            defaultValue: 'internal-build-key-123'
+        string(
+            name: 'BUILD_METADATA',
+            defaultValue: 'automated-build',
+            description: 'Build metadata (internal use)'
         )
     }
     
@@ -465,7 +466,7 @@ EOF
                     
                     // HTTP Request plugin for health checks
                     httpRequest(
-                        url: "http://54.83.68.242:7860/${params.ENVIRONMENT}.com/health",
+                        url: "http://your-app-url-${params.ENVIRONMENT}.com/health",
                         httpMode: 'GET',
                         acceptType: 'APPLICATION_JSON',
                         timeout: 30,
