@@ -32,6 +32,7 @@ pipeline {
                 script {
                     def tag = "${params.BRANCH}-${env.BUILD_NUMBER}"
                     sh """
+                    sudo docker rm -f cicd_flask_${BUILD_NUMBER}
                         sudo docker build -t cicd_flask_app:${tag} -f Dockerfile .
                         sudo docker run -d -p 7860:7860 --name cicd_flask_${BUILD_NUMBER} cicd_flask_app:${tag}
                     """
