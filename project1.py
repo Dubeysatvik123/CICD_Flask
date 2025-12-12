@@ -5,6 +5,144 @@ import time
 genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
+model = genai.GenerativeModel("gemini-1.5-flash")
+
 def evaluate_startup_idea(prompt, progress=gr.Progress()):
     """Evaluate startup idea with progress tracking"""
     if not prompt.strip():
