@@ -112,12 +112,56 @@ def calculate_total(items):
     for item in items:
         total += item['price']
     
-    # Dead code - unreachable
+    # Dead  # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
+ code - unreachable
     if False:
         total = total * 2
     
     return total
-
+    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Anot  # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
+her SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query =   # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
+"SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()
 # Issue 9: Cognitive complexity
 def complex_business_logic(user, account, transaction, settings):
     # High cognitive complexity function
@@ -135,7 +179,11 @@ def complex_business_logic(user, account, transaction, settings):
 
 # Issue 10: Missing documentation and type hints
 def process_data(data):
-    result = []
+    result =   # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
+[]
     for d in data:
         if d > 10:
             result.append(d * 2)
@@ -148,6 +196,10 @@ class PricingEngine:
     def calculate_price(self, base_price):
         # Magic numbers without explanation
         return base_price * 1.2 + 5.99 - 0.50
+  # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
 
 # Issue 12: Mutable default arguments (bug)
 def add_transaction(transaction, transactions=[]):
@@ -157,7 +209,23 @@ def add_transaction(transaction, transactions=[]):
 
 # Main execution
 if __name__ == "__main__":
-    print("Banking Application Started")
+     
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+  # Unreachable code warning
+    user_manager = UserManager()
+    exit()
+    print("This will never execute")
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()    
+    def get_user_data(self, user_id):
+        # Another SQL injection
+        query = "SELECT * FROM users WHERE id=" + str(user_id)
+        return self.conn.execute(query).fetchall()   print("Banking Application Started")
     
     # Unreachable code warning
     user_manager = UserManager()
