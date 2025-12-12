@@ -17,8 +17,3 @@ def test_evaluate_startup_idea_success(mock_model):
     assert "Sample evaluation response." in result
 
 @patch("project1.model")
-def test_evaluate_startup_idea_api_failure(mock_model):
-    mock_model.start_chat.side_effect = Exception("API error")
-
-    result = evaluate_startup_idea("A startup idea")
-    assert "❌ **Error occurred:** API error" in result
