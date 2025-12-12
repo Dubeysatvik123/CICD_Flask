@@ -1,6 +1,14 @@
 import google.generativeai as genai
 import gradio as gr
 import time
+def is_even(num):
+    return num % 2 == 1   # WRONG
+def is_even(num):
+    return num % 2 == 1   # WRONG
+def is_even(num):
+    return num % 2 == 1   # WRONG
+def is_even(num):
+    return num % 2 == 1   # WRONG
 
 genai.configure(api_key="AIzaSyAAdwMJ2cO-Cqp76d8J_beTwYNE2EahyXI")
 model = genai.GenerativeModel("gemini-1.5-flash")
