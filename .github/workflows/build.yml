@@ -1,4 +1,4 @@
-name: Build and SonarQube Analysis
+name: Build, SAST & SonarQube Analysis
 
 on:
   push:
@@ -11,40 +11,82 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
+      # ----------------------------------------------
+      # Checkout Code
+      # ----------------------------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Set up Python
+      # ----------------------------------------------
+      # Python Setup
+      # ----------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # Install dependencies
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-          pip install coverage pytest
+          pip install coverage pytest safety pip-audit
 
-      # Run tests + coverage
-      - name: Run Tests
+      # ----------------------------------------------
+      # SAST (Python security linting)
+      # ----------------------------------------------
+      - name: Run Bandit (SAST)
+        uses: PyCQA/bandit@master
+        with:
+          args: "-r . -f json -o bandit-report.json"
+        continue-on-error: true
+
+      # ----------------------------------------------
+      # Dependency Vulnerability Scan
+      # ----------------------------------------------
+
+      # pip-audit (Python dependency CVEs)
+      - name: pip-audit Scan
+        run: |
+          pip-audit --output pip-audit.json --format json
+        continue-on-error: true
+
+      # Safety (Dependency security)
+      - name: Safety Scan
+        run: |
+          safety check --json > safety-report.json
+        continue-on-error: true
+
+      # Trivy filesystem scan
+      - name: Trivy FS Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'json'
+          output: 'trivy-fs-report.json'
+        continue-on-error: true
+
+      # ----------------------------------------------
+      # Run Tests + Coverage
+      # ----------------------------------------------
+      - name: Run Unit Tests
         run: |
           coverage run -m pytest
           coverage xml
 
-      # SonarQube Scan
+      # ----------------------------------------------
+      # SonarQube Scan (includes SAST + coverage)
+      # ----------------------------------------------
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Optional — fail pipeline if Quality Gate fails
+      # Optional - Quality Gate
       # - name: SonarQube Quality Gate
       #   uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   timeout-minutes: 5
