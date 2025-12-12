@@ -1,294 +1,102 @@
-name: SonarQube Comprehensive Analysis
+name: Full CI + SonarQube + SAST + Dependency Security
+
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened]
 
 jobs:
-  sonarqube-analysis:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      # ----------------------------------------------
-      # Checkout Code
-      # ----------------------------------------------
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones disabled for better analysis
-      
-      # ----------------------------------------------
-      # Python Setup
-      # ----------------------------------------------
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      
-      - name: Install Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install coverage pytest pytest-cov
-      
-      # ----------------------------------------------
-      # Run Tests with Coverage for SonarQube
-      # ----------------------------------------------
-      - name: Run Tests with Coverage
-        run: |
-          # Run pytest with coverage in XML format for SonarQube
-          coverage run -m pytest --junitxml=test-results.xml -v
-          coverage xml -o coverage.xml
-          coverage report
-        continue-on-error: false
-      
-      # ----------------------------------------------
-      # Generate External Reports for SonarQube Import
-      # ----------------------------------------------
-      
-      # Bandit Report (Security) - SonarQube can import this
-      - name: Run Bandit Security Scan
-        run: |
-          pip install bandit
-          bandit -r . -f json -o bandit-report.json || true
-        continue-on-error: true
-      
-      # Pylint Report - SonarQube can import this
-      - name: Run Pylint
-        run: |
-          pip install pylint
-          pylint **/*.py --output-format=json > pylint-report.json || true
-          pylint **/*.py --output-format=parseable > pylint-report.txt || true
-        continue-on-error: true
-      
-      # Flake8 Report
-      - name: Run Flake8
-        run: |
-          pip install flake8
-          flake8 . --format=json --output-file=flake8-report.json --max-line-length=100 || true
-        continue-on-error: true
-      
-      # MyPy Type Checking
-      - name: Run MyPy Type Checking
-        run: |
-          pip install mypy
-          mypy . --ignore-missing-imports --junit-xml mypy-report.xml || true
-        continue-on-error: true
-      
-      # Dependency Vulnerability Scans
-      - name: Run pip-audit
-        run: |
-          pip install pip-audit
-          pip-audit --format json --output pip-audit-report.json || true
-        continue-on-error: true
-      
-      - name: Run Safety Check
-        run: |
-          pip install safety
-          safety check --json > safety-report.json || true
-        continue-on-error: true
-      
-      - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'json'
-          output: 'trivy-report.json'
-        continue-on-error: true
-      
-      # ----------------------------------------------
-      # Create sonar-project.properties
-      # ----------------------------------------------
-      - name: Create SonarQube Configuration
-        run: |
-          cat > sonar-project.properties << EOF
-          # Project Identification
-          sonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
-          sonar.projectName=${{ github.event.repository.name }}
-          sonar.projectVersion=1.0
-          
-          # Source Code
-          sonar.sources=.
-          sonar.sourceEncoding=UTF-8
-          sonar.language=py
-          
-          # Exclusions
-          sonar.exclusions=**/tests/**,**/test_*.py,**/__pycache__/**,**/venv/**,**/env/**,**/.venv/**,**/build/**,**/dist/**,**/*.pyc
-          
-          # Test Configuration
-          sonar.tests=tests
-          sonar.test.inclusions=**/test_*.py,**/*_test.py
-          
-          # Coverage Reports
-          sonar.python.coverage.reportPaths=coverage.xml
-          sonar.coverage.exclusions=**/tests/**,**/test_*.py
-          
-          # Test Results
-          sonar.testExecutionReportPaths=test-results.xml
-          
-          # External Reports Import
-          sonar.python.bandit.reportPaths=bandit-report.json
-          sonar.python.pylint.reportPaths=pylint-report.json
-          sonar.python.flake8.reportPaths=flake8-report.json
-          sonar.python.mypy.reportPaths=mypy-report.xml
-          
-          # Code Quality Settings
-          sonar.qualitygate.wait=true
-          sonar.qualitygate.timeout=300
-          
-          # Duplication Detection
-          sonar.cpd.exclusions=**/tests/**
-          
-          # SCM Information
-          sonar.scm.provider=git
-          
-          # Pull Request Analysis (for PRs)
-          $(if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "sonar.pullrequest.key=${{ github.event.pull_request.number }}"
-            echo "sonar.pullrequest.branch=${{ github.head_ref }}"
-            echo "sonar.pullrequest.base=${{ github.base_ref }}"
-          fi)
-          EOF
-          
-          cat sonar-project.properties
-      
-      # ----------------------------------------------
-      # SonarQube Scan - Main Analysis
-      # ----------------------------------------------
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.verbose=true
-      
-      # ----------------------------------------------
-      # Quality Gate Check
-      # ----------------------------------------------
-      - name: SonarQube Quality Gate Check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        continue-on-error: true
-      
-      # ----------------------------------------------
-      # Generate Summary Report
-      # ----------------------------------------------
-      - name: Generate Analysis Summary
-        if: always()
-        run: |
-          echo "# 📊 SonarQube Analysis Summary" > analysis-summary.md
-          echo "" >> analysis-summary.md
-          echo "**Repository:** ${{ github.repository }}" >> analysis-summary.md
-          echo "**Branch:** ${{ github.ref_name }}" >> analysis-summary.md
-          echo "**Commit:** ${{ github.sha }}" >> analysis-summary.md
-          echo "**Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> analysis-summary.md
-          echo "" >> analysis-summary.md
-          echo "## Analysis Components" >> analysis-summary.md
-          echo "" >> analysis-summary.md
-          echo "✅ **Code Coverage:** Generated and uploaded to SonarQube" >> analysis-summary.md
-          echo "✅ **Security Analysis:** Bandit, pip-audit, Safety, Trivy" >> analysis-summary.md
-          echo "✅ **Code Quality:** Pylint, Flake8, MyPy" >> analysis-summary.md
-          echo "✅ **Code Smells:** Detected by SonarQube" >> analysis-summary.md
-          echo "✅ **Duplication:** Analyzed by SonarQube" >> analysis-summary.md
-          echo "✅ **Complexity:** Measured by SonarQube" >> analysis-summary.md
-          echo "" >> analysis-summary.md
-          echo "## 🔗 View Results" >> analysis-summary.md
-          echo "" >> analysis-summary.md
-          echo "Access detailed analysis at: \${SONAR_HOST_URL}/dashboard?id=${{ github.repository_owner }}_${{ github.event.repository.name }}" >> analysis-summary.md
-          
-          cat analysis-summary.md
-      
-      # ----------------------------------------------
-      # Upload All Reports as Artifacts
-      # ----------------------------------------------
-      - name: Upload Analysis Artifacts
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: sonarqube-analysis-reports
-          path: |
-            coverage.xml
-            test-results.xml
-            bandit-report.json
-            pylint-report.json
-            pylint-report.txt
-            flake8-report.json
-            mypy-report.xml
-            pip-audit-report.json
-            safety-report.json
-            trivy-report.json
-            sonar-project.properties
-            analysis-summary.md
-            .scannerwork/
-      
-      # ----------------------------------------------
-      # Comment on PR with SonarQube Results
-      # ----------------------------------------------
-      - name: Comment PR with SonarQube Link
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const projectKey = '${{ github.repository_owner }}_${{ github.event.repository.name }}';
-            const sonarUrl = process.env.SONAR_HOST_URL || '${{ secrets.SONAR_HOST_URL }}';
-            const prNumber = '${{ github.event.pull_request.number }}';
-            
-            const message = `## 🔍 SonarQube Analysis Complete
-            
-            Your code has been analyzed by SonarQube with comprehensive checks including:
-            
-            - ✅ Code Quality Analysis
-            - ✅ Security Vulnerabilities (SAST)
-            - ✅ Code Coverage
-            - ✅ Code Smells & Bugs
-            - ✅ Code Duplication
-            - ✅ Complexity Metrics
-            - ✅ Dependency Vulnerabilities
-            
-            ### 📊 View Detailed Results
-            
-            **Pull Request Analysis:** [View in SonarQube](${sonarUrl}/dashboard?id=${projectKey}&pullRequest=${prNumber})
-            
-            **Project Dashboard:** [View Overall Project](${sonarUrl}/dashboard?id=${projectKey})
-            
-            ### 📁 Artifacts
-            
-            All analysis reports are available in the [workflow artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-            
-            ---
-            *Analysis powered by SonarQube*`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        continue-on-error: true
-      
-      # ----------------------------------------------
-      # Fail Build on Quality Gate Failure
-      # ----------------------------------------------
-      - name: Check Quality Gate Status
-        if: always()
-        run: |
-          echo "Quality Gate check completed. Review SonarQube dashboard for details."
-          # The quality gate action above will fail the build if quality gate fails
+    # --------------------------------------------------------
+    # 1. CHECKOUT
+    # --------------------------------------------------------
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0     # Required for SonarQube PR decoration & blame
+
+    # --------------------------------------------------------
+    # 2. PYTHON SETUP
+    # --------------------------------------------------------
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest coverage bandit pip-audit safety
+
+    # --------------------------------------------------------
+    # 3. UNIT TESTS + COVERAGE
+    # --------------------------------------------------------
+    - name: Run Tests + Coverage
+      run: |
+        coverage run -m pytest
+        coverage xml
+
+    # --------------------------------------------------------
+    # 4. SAST (Secure Static Analysis)
+    # --------------------------------------------------------
+    - name: Bandit SAST Scan
+      run: |
+        bandit -r . -f json -o bandit-report.json
+      continue-on-error: true
+
+    # --------------------------------------------------------
+    # 5. DEPENDENCY VULNERABILITY SCANNING
+    # --------------------------------------------------------
+    - name: pip-audit
+      run: |
+        pip-audit --format json --output pip-audit.json
+      continue-on-error: true
+
+    - name: Safety Scan
+      run: |
+        safety check --json > safety-report.json
+      continue-on-error: true
+
+    - name: Trivy Filesystem Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: fs
+        ignore-unfixed: true
+        format: json
+        output: trivy-fs.json
+      continue-on-error: true
+
+    # --------------------------------------------------------
+    # 6. SONARQUBE SCAN (FULL FEATURES)
+    # --------------------------------------------------------
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    # --------------------------------------------------------
+    # 7. QUALITY GATE ENFORCEMENT (BLOCK PIPELINE IF FAILED)
+    # --------------------------------------------------------
+    - name: SonarQube Quality Gate Check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    # --------------------------------------------------------
+    # 8. UPLOAD SECURITY ARTIFACTS
+    # --------------------------------------------------------
+    - name: Upload Security Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          pip-audit.json
+          safety-report.json
+          trivy-fs.json
+          coverage.xml
