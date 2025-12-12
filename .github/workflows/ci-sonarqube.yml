@@ -1,0 +1,81 @@
+name: Build-Test-SonarQube
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    name: CI + SonarQube Analysis
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # full clone for better Sonar analysis
+
+      # 2️⃣ Set up Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install coverage pytest pytest-cov flake8 bandit
+
+      # 4️⃣ Run Flake8 lint
+      - name: Lint with Flake8
+        run: flake8 src tests --exit-zero
+
+      # 5️⃣ Run Bandit (SAST)
+      - name: Security scan with Bandit
+        run: bandit -r src -f json -o bandit-report.json || true
+
+      # 6️⃣ Run tests with coverage
+      - name: Run tests and collect coverage
+        run: |
+          coverage run --source=src -m pytest tests
+          coverage xml -i
+          coverage report -m
+
+      # 7️⃣ Upload coverage reports as artifacts
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+
+      # 8️⃣ Upload Bandit report
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+      # 9️⃣ SonarQube scan
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # 🔟 SonarQube Quality Gate check
+      - name: SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
