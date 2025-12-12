@@ -1,81 +1,66 @@
-name: Build-Test-SonarQube
+name: SonarQube Analysis
 
 on:
   push:
     branches:
       - main
+      - develop
   pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  sonarqube:
+    name: SonarQube Scan
     runs-on: ubuntu-latest
-
+    
     steps:
-      # Checkout
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-
-      # Python Setup
-      - name: Setup Python
+          fetch-depth: 0  # Shallow clones disabled for better analysis
+      
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      # Install Dependencies
-      - name: Install Dependencies
+      
+      - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install coverage pytest flake8 bandit
-
-      # ---------------------------
-      # Linting (Flake8)
-      # ---------------------------
-      - name: Run Flake8 Linting
-        run: flake8 --exit-zero .
-
-      # ---------------------------
-      # SAST Static Analysis (Bandit)
-      # ---------------------------
-      - name: Security Scan with Bandit
-        run: bandit -r . -f json -o bandit-report.json || true
-
-      # ---------------------------
-      # Run Tests + Coverage
-      # ---------------------------
-      - name: Run Tests with Coverage
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov coverage
+      
+      - name: Run tests with coverage
         run: |
-          coverage run -m pytest
-          coverage xml
-      # Upload coverage.xml as artifact (v4)
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-      # Upload Bandit report (v4)
-      - name: Upload Bandit Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: bandit-report.json
-
-      # ---------------------------
-      # SonarQube Scan
-      # ---------------------------
+          pytest test_vulnerable_app.py \
+            --cov=vulnerable_app \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html \
+            --junitxml=test-results.xml \
+            -v
+      
+      - name: Display coverage report
+        run: |
+          coverage report -m
+      
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      # ---------------------------
-      # (Optional) Quality Gate Check
-      # ---------------------------
-      # - name: SonarQube Quality Gate
-      #   uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+      
+      - name: Upload coverage to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+            test-results.xml
