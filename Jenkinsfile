@@ -9,6 +9,25 @@ pipeline {
         )
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     environment {
         REPO_URL = 'https://github.com/Dubeysatvik123/CICD_Flask.git'
         IMAGE_NAME = "cicd_flask_app:${params.BRANCH_TO_BUILD}"
