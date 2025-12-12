@@ -36,16 +36,16 @@ jobs:
 
       # 4️⃣ Run Flake8 lint
       - name: Lint with Flake8
-        run: flake8 src tests --exit-zero
+        run: flake8 --exit-zero
 
       # 5️⃣ Run Bandit (SAST)
       - name: Security scan with Bandit
-        run: bandit -r src -f json -o bandit-report.json || true
+        run: bandit -f json -o bandit-report.json || true
 
       # 6️⃣ Run tests with coverage
       - name: Run tests and collect coverage
         run: |
-          coverage run --source=src -m pytest
+          coverage run -m pytest
           coverage xml -i
           coverage report -m
 
