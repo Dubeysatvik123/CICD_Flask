@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 import pickle
-import project1
+import vulnerable_app
 
 
 # -----------------------------
